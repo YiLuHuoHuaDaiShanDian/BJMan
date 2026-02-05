@@ -48,12 +48,12 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/git-update') {
-    exec('git update', { cwd: ROOT }, (error, stdout, stderr) => {
+  if (req.method === 'POST' && req.url === '/git-pull') {
+    exec('git pull', { cwd: ROOT }, (error, stdout, stderr) => {
       const code = error && typeof error.code === 'number' ? error.code : 0;
       if (error) {
         sendJson(res, 500, {
-          command: 'git update',
+          command: 'git pull',
           code,
           stdout,
           stderr,
@@ -63,7 +63,7 @@ const server = http.createServer((req, res) => {
       }
 
       sendJson(res, 200, {
-        command: 'git update',
+        command: 'git pull',
         code,
         stdout,
         stderr
@@ -82,5 +82,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`Update page running at http://${HOST}:${PORT}/update.html`);
+  console.log(`Pull page running at http://${HOST}:${PORT}/update.html`);
 });

@@ -4,7 +4,7 @@
 
 ## 玩法
 - 5 个场景：早上、上午、中午、下午、晚上。
-- 5 个核心变量：Face、Money、Relation、Energy、Mood。
+- 5 个核心变量：面子、钱、关系、精力、心气。
 - 每个场景提供 2～3 个都不完美的选项。
 - 一天结束后基于整体状态触发 3 个结局：
   - 撑过去了
@@ -21,7 +21,7 @@ python3 -m http.server 8000
 访问 <http://localhost:8000>。
 
 ## 单独更新页面
-新增 `update.html` + `update-server.js`，用于在项目目录执行 `git update`。
+新增 `update.html` + `update-server.js`，用于在项目目录执行 `git pull`。
 
 启动方式：
 
@@ -31,4 +31,4 @@ node update-server.js
 
 打开：<http://localhost:8787/update.html>
 
-点击页面里的 **Update** 按钮后，后端会执行 `git update` 并把命令输出显示在页面上。
+点击页面里的 **拉取更新** 按钮后，后端会执行 `git pull` 并把命令输出显示在页面上。

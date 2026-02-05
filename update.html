@@ -74,21 +74,21 @@
 <body>
   <main class="panel">
     <h1>仓库自动更新</h1>
-    <p>点击按钮后，会在当前项目目录执行 <code>git update</code>。</p>
-    <button id="updateBtn">Update</button>
+    <p>点击按钮后，会在当前项目目录执行 <code>git pull</code>。</p>
+    <button id="pullBtn">拉取更新</button>
     <pre id="result">等待执行...</pre>
   </main>
 
   <script>
-    const updateBtn = document.getElementById('updateBtn');
+    const pullBtn = document.getElementById('pullBtn');
     const result = document.getElementById('result');
 
-    updateBtn.addEventListener('click', async () => {
-      updateBtn.disabled = true;
-      result.textContent = '正在执行 git update ...';
+    pullBtn.addEventListener('click', async () => {
+      pullBtn.disabled = true;
+      result.textContent = '正在执行 git pull ...';
 
       try {
-        const response = await fetch('/git-update', { method: 'POST' });
+        const response = await fetch('/git-pull', { method: 'POST' });
         const data = await response.json();
 
         if (!response.ok) {
@@ -108,7 +108,7 @@
       } catch (error) {
         result.textContent = `更新失败: ${error.message}`;
       } finally {
-        updateBtn.disabled = false;
+        pullBtn.disabled = false;
       }
     });
   </script>
