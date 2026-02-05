@@ -1,0 +1,142 @@
+:root {
+  color-scheme: dark;
+  --bg: #131313;
+  --card: #1f1f1f;
+  --text: #ece7df;
+  --muted: #a8a299;
+  --accent: #d9924e;
+  --good: #79c26f;
+  --bad: #d87a7a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: radial-gradient(circle at top, #222 0, var(--bg) 45%);
+  color: var(--text);
+}
+
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+h1 {
+  margin-bottom: 6px;
+}
+
+h1 span {
+  display: inline-block;
+  font-size: 0.6em;
+  color: var(--accent);
+  margin-left: 8px;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.stat {
+  background: var(--card);
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+.stat label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.stat strong {
+  font-size: 1.25rem;
+}
+
+.scene-card,
+.log-card,
+.ending {
+  background: var(--card);
+  border: 1px solid #343434;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.time {
+  color: var(--accent);
+  margin: 0;
+}
+
+.desc {
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.options {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+button.option,
+#restartBtn {
+  background: #2c2c2c;
+  color: var(--text);
+  border: 1px solid #4a4a4a;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+button.option:hover,
+#restartBtn:hover {
+  border-color: var(--accent);
+}
+
+.log-card ul {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.effect-pos {
+  color: var(--good);
+}
+
+.effect-neg {
+  color: var(--bad);
+}
+
+.hidden {
+  display: none;
+}
+
+#restartBtn {
+  margin-top: 14px;
+  width: 100%;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
