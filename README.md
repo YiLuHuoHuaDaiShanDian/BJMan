@@ -11,7 +11,7 @@
   - 有点绷不住
   - 今天算是塌了
 
-## 本地运行
+## 本地运行（游戏）
 直接打开 `index.html`，或用任意静态服务器：
 
 ```bash
@@ -19,3 +19,16 @@ python3 -m http.server 8000
 ```
 
 访问 <http://localhost:8000>。
+
+## 单独更新页面
+新增 `update.html` + `update-server.js`，用于在项目目录执行 `git update`。
+
+启动方式：
+
+```bash
+node update-server.js
+```
+
+打开：<http://localhost:8787/update.html>
+
+点击页面里的 **Update** 按钮后，后端会执行 `git update` 并把命令输出显示在页面上。

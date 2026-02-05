@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>仓库更新</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1115;
+      --card: #1a1f2b;
+      --text: #e7edf5;
+      --muted: #9eb0c4;
+      --btn: #3178ff;
+      --btn-hover: #4a89ff;
+      --btn-disabled: #5d6472;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top, #1c2330 0%, var(--bg) 55%);
+      color: var(--text);
+    }
+
+    .panel {
+      width: min(460px, calc(100vw - 32px));
+      padding: 28px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #1d2432 0%, var(--card) 100%);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
+    h1 { margin: 0 0 10px; font-size: 1.35rem; }
+    p { margin: 0 0 20px; color: var(--muted); }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--btn);
+      cursor: pointer;
+      transition: transform 0.08s ease, background 0.2s ease;
+    }
+
+    button:hover:not(:disabled) { background: var(--btn-hover); }
+    button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+    button:disabled { background: var(--btn-disabled); cursor: not-allowed; }
+
+    pre {
+      margin-top: 18px;
+      min-height: 110px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #10151f;
+      color: #cfe2ff;
+      text-align: left;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <h1>仓库自动更新</h1>
+    <p>点击按钮后，会在当前项目目录执行 <code>git update</code>。</p>
+    <button id="updateBtn">Update</button>
+    <pre id="result">等待执行...</pre>
+  </main>
+
+  <script>
+    const updateBtn = document.getElementById('updateBtn');
+    const result = document.getElementById('result');
+
+    updateBtn.addEventListener('click', async () => {
+      updateBtn.disabled = true;
+      result.textContent = '正在执行 git update ...';
+
+      try {
+        const response = await fetch('/git-update', { method: 'POST' });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || '请求失败');
+        }
+
+        result.textContent = [
+          `命令: ${data.command}`,
+          `退出码: ${data.code}`,
+          '',
+          'STDOUT:',
+          data.stdout || '(空)',
+          '',
+          'STDERR:',
+          data.stderr || '(空)'
+        ].join('\n');
+      } catch (error) {
+        result.textContent = `更新失败: ${error.message}`;
+      } finally {
+        updateBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
