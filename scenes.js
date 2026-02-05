@@ -14,12 +14,12 @@ const SCENE_PACKS = {
         },
         {
           text: "在群里阴阳一句‘理解是双向的’",
-          effects: { 面子: 6, 关系: -8, 心气: -3 },
+          effects: { 面子: 6, 人缘: -8, 心气: -3 },
           flags: ["public-conflict"],
         },
         {
           text: "私聊物业，语气客气但把问题说透",
-          effects: { 关系: 5, 精力: -5, 心气: 2 },
+          effects: { 人缘: 5, 精力: -5, 心气: 2 },
           flags: ["calm-communication"],
         },
       ],
@@ -40,13 +40,13 @@ const SCENE_PACKS = {
             {
               applyAtStage: 3,
               description: "你被追拍违停短信提醒，补缴罚款。",
-              effects: { 钱: -8, 心气: -2 },
+              effects: { 马内: -8, 心气: -2 },
             },
           ],
         },
         {
           text: "老实跟导航，顺手给同事发语音说明",
-          effects: { 面子: -2, 关系: 4, 心气: 1 },
+          effects: { 面子: -2, 人缘: 4, 心气: 1 },
           flags: ["team-trust"],
         },
       ],
@@ -57,11 +57,11 @@ const SCENE_PACKS = {
       time: "中午 · 吃饭/碰人",
       title: "面馆遇旧识",
       description:
-        "你端着一碗炸酱面刚坐下，碰见以前一起干活的老刘。\n他开口就借钱，说下周肯定还。",
+        "你端着一碗炸酱面刚坐下，碰见以前一起干活的老刘。\n他开口就借马内，说下周肯定还。",
       options: [
         {
           text: "借一小笔，留点余地",
-          effects: { 钱: -10, 关系: 8, 心气: -4 },
+          effects: { 马内: -10, 人缘: 8, 心气: -4 },
           delayedConsequences: [
             {
               applyAtStage: 4,
@@ -72,11 +72,11 @@ const SCENE_PACKS = {
         },
         {
           text: "直接拒绝：‘我现在也紧’",
-          effects: { 钱: 2, 面子: 4, 关系: -9, 心气: -2 },
+          effects: { 马内: 2, 面子: 4, 人缘: -9, 心气: -2 },
         },
         {
-          text: "请他吃饭但不借钱，把话摊开",
-          effects: { 钱: -6, 关系: 3, 面子: 2, 精力: -2 },
+          text: "请他吃饭但不借马内，把话摊开",
+          effects: { 马内: -6, 人缘: 3, 面子: 2, 精力: -2 },
           flags: ["clear-boundary"],
         },
       ],
@@ -91,17 +91,17 @@ const SCENE_PACKS = {
       options: [
         {
           text: "咬牙接了，先把事顶住",
-          effects: { 面子: 5, 精力: -12, 心气: -8, 关系: 4 },
+          effects: { 面子: 5, 精力: -12, 心气: -8, 人缘: 4 },
           flags: ["overdraft-energy"],
         },
         {
           text: "明确拒绝：今天真不行",
-          effects: { 面子: -6, 心气: 6, 关系: -5, 精力: 5 },
+          effects: { 面子: -6, 心气: 6, 人缘: -5, 精力: 5 },
           flags: ["self-priority"],
         },
         {
           text: "提议分工：你做核心，其他人补齐",
-          effects: { 关系: 6, 精力: -5, 心气: -2, 面子: 2 },
+          effects: { 人缘: 6, 精力: -5, 心气: -2, 面子: 2 },
           flags: ["team-trust"],
         },
       ],
@@ -120,11 +120,11 @@ const SCENE_PACKS = {
         },
         {
           text: "刷短视频到困，啥也不想",
-          effects: { 心气: 2, 精力: -4, 钱: -2 },
+          effects: { 心气: 2, 精力: -4, 马内: -2 },
         },
         {
           text: "给一个信得过的人发语音，认个怂",
-          effects: { 关系: 7, 心气: 4, 面子: -3 },
+          effects: { 人缘: 7, 心气: 4, 面子: -3 },
         },
       ],
     },
@@ -140,21 +140,21 @@ const SCENE_PACKS = {
       options: [
         {
           text: "赔笑，先撤，去外面复印再回来",
-          effects: { 面子: -5, 钱: -3, 精力: -4, 关系: 3 },
+          effects: { 面子: -5, 马内: -3, 精力: -4, 人缘: 3 },
         },
         {
           text: "据理力争：‘你们昨天电话不是这么说的’",
-          effects: { 面子: 7, 心气: -6, 关系: -6, 精力: -3 },
+          effects: { 面子: 7, 心气: -6, 人缘: -6, 精力: -3 },
           flags: ["public-conflict"],
         },
         {
-          text: "给门口黄牛点钱，让他帮你跑一趟",
-          effects: { 钱: -12, 精力: 4, 面子: -2, 关系: -2 },
+          text: "给门口黄牛点马内，让他帮你跑一趟",
+          effects: { 马内: -12, 精力: 4, 面子: -2, 人缘: -2 },
           delayedConsequences: [
             {
               applyAtStage: 4,
               description: "黄牛又来私信你，后续还想加价。",
-              effects: { 心气: -3, 钱: -4 },
+              effects: { 心气: -3, 马内: -4 },
             },
           ],
         },
@@ -171,11 +171,11 @@ const SCENE_PACKS = {
       options: [
         {
           text: "现在就下单买成品，省时间",
-          effects: { 钱: -9, 精力: 3, 心气: 1 },
+          effects: { 马内: -9, 精力: 3, 心气: 1 },
         },
         {
           text: "回家手工凑一个，今晚少睡",
-          effects: { 钱: -2, 精力: -8, 关系: 5, 心气: -1 },
+          effects: { 马内: -2, 精力: -8, 人缘: 5, 心气: -1 },
         },
       ],
     },
@@ -190,11 +190,11 @@ const SCENE_PACKS = {
       options: [
         {
           text: "把消息分优先级，先回三条最要紧的",
-          effects: { 心气: 6, 关系: 3, 精力: -1 },
+          effects: { 心气: 6, 人缘: 3, 精力: -1 },
         },
         {
           text: "都先晾着，今晚只顾自己",
-          effects: { 精力: 4, 心气: 2, 关系: -5 },
+          effects: { 精力: 4, 心气: 2, 人缘: -5 },
         },
       ],
     },
