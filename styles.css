@@ -67,6 +67,28 @@ h1 span {
   font-size: 1.25rem;
 }
 
+.stat-bar {
+  margin-top: 8px;
+  height: 5px;
+  border-radius: 999px;
+  background: #2b2b2b;
+  overflow: hidden;
+}
+
+.stat-bar span {
+  display: block;
+  height: 100%;
+  background: #7f8790;
+}
+
+.stat-bar .bar-good {
+  background: var(--good);
+}
+
+.stat-bar .bar-bad {
+  background: var(--bad);
+}
+
 .scene-card,
 .log-card,
 .ending {
@@ -94,7 +116,8 @@ h1 span {
 }
 
 button.option,
-#restartBtn {
+#restartBtn,
+.copy-btn {
   background: #2c2c2c;
   color: var(--text);
   border: 1px solid #4a4a4a;
@@ -106,7 +129,8 @@ button.option,
 }
 
 button.option:hover,
-#restartBtn:hover {
+#restartBtn:hover,
+.copy-btn:hover {
   border-color: var(--accent);
 }
 
@@ -117,12 +141,19 @@ button.option:hover,
   color: var(--muted);
 }
 
-.effect-pos {
-  color: var(--good);
+.recap {
+  margin-top: 12px;
+  border-top: 1px dashed #3a3a3a;
+  padding-top: 10px;
 }
 
-.effect-neg {
-  color: var(--bad);
+.recap h4 {
+  margin: 0 0 8px;
+  color: var(--accent);
+}
+
+.copy-btn {
+  margin-top: 8px;
 }
 
 .hidden {

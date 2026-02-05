@@ -6,112 +6,21 @@ const initialStats = {
   心气: 50,
 };
 
-const scenes = [
-  {
-    time: "早上 · 出门",
-    title: "电梯口那一分钟",
-    description:
-      "你站在楼道里，电梯慢得像故意跟你作对。\n手机弹出物业群消息：‘近期请大家理解施工。’\n你看了眼时间，迟到边缘。",
-    options: [
-      {
-        text: "忍着不说，走楼梯下去",
-        effects: { 心气: 5, 面子: -4, 精力: -6 },
-      },
-      {
-        text: "在群里阴阳一句‘理解是双向的’",
-        effects: { 面子: 6, 关系: -8, 心气: -3 },
-      },
-      {
-        text: "私聊物业，语气客气但把问题说透",
-        effects: { 关系: 5, 精力: -5, 心气: 2 },
-      },
-    ],
-  },
-  {
-    time: "上午 · 办事",
-    title: "窗口前的规矩",
-    description:
-      "你去办一张证明，窗口说材料差一页复印件。\n后面队伍已经开始不耐烦。工作人员没抬头，只说‘下一位’。",
-    options: [
-      {
-        text: "赔笑，先撤，去外面复印再回来",
-        effects: { 面子: -5, 钱: -3, 精力: -4, 关系: 3 },
-      },
-      {
-        text: "据理力争：‘你们昨天电话不是这么说的’",
-        effects: { 面子: 7, 心气: -6, 关系: -6, 精力: -3 },
-      },
-      {
-        text: "给门口黄牛点钱，让他帮你跑一趟",
-        effects: { 钱: -12, 精力: 4, 面子: -2, 关系: -2 },
-      },
-    ],
-  },
-  {
-    time: "中午 · 吃饭/碰人",
-    title: "面馆遇旧识",
-    description:
-      "你端着一碗炸酱面刚坐下，碰见以前一起干活的老刘。\n他开口就借钱，说下周肯定还。",
-    options: [
-      {
-        text: "借一小笔，留点余地",
-        effects: { 钱: -10, 关系: 8, 心气: -4 },
-      },
-      {
-        text: "直接拒绝：‘我现在也紧’",
-        effects: { 钱: 2, 面子: 4, 关系: -9, 心气: -2 },
-      },
-      {
-        text: "请他吃饭但不借钱，把话摊开",
-        effects: { 钱: -6, 关系: 3, 面子: 2, 精力: -2 },
-      },
-    ],
-  },
-  {
-    time: "下午 · 冲突/抉择",
-    title: "临时加活",
-    description:
-      "领导临时甩来一份活，今晚要。\n你本来答应家里去接孩子。\n群里没人接话，气氛像一锅闷着的水。",
-    options: [
-      {
-        text: "咬牙接了，先把事顶住",
-        effects: { 面子: 5, 精力: -12, 心气: -8, 关系: 4 },
-      },
-      {
-        text: "明确拒绝：今天真不行",
-        effects: { 面子: -6, 心气: 6, 关系: -5, 精力: 5 },
-      },
-      {
-        text: "提议分工：你做核心，其他人补齐",
-        effects: { 关系: 6, 精力: -5, 心气: -2, 面子: 2 },
-      },
-    ],
-  },
-  {
-    time: "晚上 · 结算/反思",
-    title: "楼下小卖部",
-    description:
-      "夜里回到楼下，你买了瓶冰水坐在台阶上。\n微信里未读消息一串，银行卡余额不太好看。\n你决定怎么收这一天。",
-    options: [
-      {
-        text: "把今天账单和安排记下来，明天按计划来",
-        effects: { 心气: 8, 精力: 3, 面子: -1 },
-      },
-      {
-        text: "刷短视频到困，啥也不想",
-        effects: { 心气: 2, 精力: -4, 钱: -2 },
-      },
-      {
-        text: "给一个信得过的人发语音，认个怂",
-        effects: { 关系: 7, 心气: 4, 面子: -3 },
-      },
-    ],
-  },
-];
+const enabledPacks = ["main", "hutong-weekend"];
+const scenePool = enabledPacks.flatMap((pack) => window.SCENE_PACKS[pack] || []);
+const STAGE_COUNT = 5;
 
 let stats = { ...initialStats };
-let sceneIndex = 0;
+let stageIndex = 0;
+let currentScene = null;
+let usedSceneIds = new Set();
 const logList = [];
+const turnHistory = [];
+const flags = new Set();
+const pendingConsequences = [];
+const optionImpact = new Map();
+let consecutiveBadTurns = 0;
+let hopeUsed = false;
 
 const statsEl = document.getElementById("stats");
 const timeTagEl = document.getElementById("timeTag");
@@ -126,32 +35,132 @@ function clamp(value) {
   return Math.max(0, Math.min(100, value));
 }
 
-function renderStats() {
-  statsEl.innerHTML = Object.entries(stats)
-    .map(
-      ([key, value]) =>
-        `<div class="stat"><label>${key}</label><strong>${value}</strong></div>`
-    )
-    .join("");
+function getTotalEffectMagnitude(effects) {
+  return Object.values(effects || {}).reduce((sum, value) => sum + Math.abs(value), 0);
+}
+
+function applyEffects(effects) {
+  Object.entries(effects || {}).forEach(([key, value]) => {
+    stats[key] = clamp(stats[key] + value);
+  });
 }
 
 function describeEffects(effects) {
-  return Object.entries(effects)
+  return Object.entries(effects || {})
     .map(([key, val]) => `${key}${val > 0 ? `+${val}` : val}`)
     .join(" / ");
+}
+
+function renderStats() {
+  statsEl.innerHTML = Object.entries(stats)
+    .map(([key, value]) => {
+      const barClass = value >= 60 ? "bar-good" : value < 35 ? "bar-bad" : "";
+      return `
+        <div class="stat">
+          <label>${key}</label>
+          <strong>${value}</strong>
+          <div class="stat-bar"><span class="${barClass}" style="width:${value}%"></span></div>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 function renderLog() {
   logListEl.innerHTML = logList.map((item) => `<li>${item}</li>`).join("");
 }
 
+function addImpact(optionLabel, effects) {
+  const previous = optionImpact.get(optionLabel) || 0;
+  optionImpact.set(optionLabel, previous + getTotalEffectMagnitude(effects));
+}
+
+function resolvePendingConsequences() {
+  const dueItems = pendingConsequences.filter((item) => item.applyAtStage === stageIndex);
+  const remaining = pendingConsequences.filter((item) => item.applyAtStage !== stageIndex);
+  pendingConsequences.length = 0;
+  pendingConsequences.push(...remaining);
+
+  dueItems.forEach((item) => {
+    applyEffects(item.effects);
+    addImpact(item.source, item.effects);
+    logList.push(`⚠️ 延迟后果：${item.description}（${describeEffects(item.effects)}）`);
+  });
+}
+
+function sceneAvailable(scene) {
+  if (scene.stage !== stageIndex || usedSceneIds.has(scene.id)) {
+    return false;
+  }
+  if (scene.requiresAnyFlags && !scene.requiresAnyFlags.some((flag) => flags.has(flag))) {
+    return false;
+  }
+  if (scene.requiresAllFlags && !scene.requiresAllFlags.every((flag) => flags.has(flag))) {
+    return false;
+  }
+  return true;
+}
+
+function chooseScene() {
+  const candidates = scenePool.filter(sceneAvailable);
+  if (!candidates.length) {
+    return null;
+  }
+  const weighted = candidates
+    .map((scene) => {
+      const weight = (scene.requiresAnyFlags || []).filter((flag) => flags.has(flag)).length + 1;
+      return { scene, weight };
+    })
+    .sort((a, b) => b.weight - a.weight);
+
+  return weighted[0].scene;
+}
+
+function maybeAddHopeOption(options) {
+  if (consecutiveBadTurns < 2 || hopeUsed) {
+    return options;
+  }
+  const hopeOption = {
+    text: "给自己十分钟，喝口热水，把今天拆成三件能做的小事",
+    effects: { 心气: 6, 精力: 4, 面子: -1 },
+    flags: ["self-repair"],
+  };
+  return [...options, hopeOption];
+}
+
 function chooseOption(option) {
-  Object.entries(option.effects).forEach(([k, v]) => {
-    stats[k] = clamp(stats[k] + v);
+  const optionLabel = `${currentScene.time}｜${option.text}`;
+  const netScore = Object.values(option.effects).reduce((sum, value) => sum + value, 0);
+
+  applyEffects(option.effects);
+  addImpact(optionLabel, option.effects);
+
+  if (option.flags) {
+    option.flags.forEach((flag) => flags.add(flag));
+  }
+
+  if (option.delayedConsequences) {
+    option.delayedConsequences.forEach((consequence) => {
+      pendingConsequences.push({ ...consequence, source: optionLabel });
+    });
+  }
+
+  if (option.text.startsWith("给自己十分钟")) {
+    hopeUsed = true;
+  }
+
+  turnHistory.push({
+    stage: stageIndex,
+    sceneId: currentScene.id,
+    sceneTitle: currentScene.title,
+    optionText: option.text,
+    effects: { ...option.effects },
   });
 
-  logList.push(`${scenes[sceneIndex].time}：${option.text}（${describeEffects(option.effects)}）`);
-  sceneIndex += 1;
+  logList.push(`${currentScene.time}：${option.text}（${describeEffects(option.effects)}）`);
+  consecutiveBadTurns = netScore < 0 ? consecutiveBadTurns + 1 : 0;
+
+  stageIndex += 1;
   renderStats();
   renderLog();
   renderScene();
@@ -159,57 +168,135 @@ function chooseOption(option) {
 
 function getEnding() {
   const average = Object.values(stats).reduce((a, b) => a + b, 0) / 5;
-  if (average >= 52 && stats["精力"] >= 35 && stats["心气"] >= 35) {
+  const minStat = Object.entries(stats).sort((a, b) => a[1] - b[1])[0];
+
+  if (stats["精力"] <= 18) {
     return {
-      title: "结局：撑过去了",
-      text: "今天没赢，也没输。你只是把每一口气都续上了。\n北京还是那样，你也还是你。明天还能出门。",
+      title: "结局：电量见底",
+      text: "你把今天硬扛过去了，但身体在抗议。明天第一件事，不是冲，是补觉。",
     };
   }
-  if (average >= 38 && stats["心气"] >= 20) {
+  if (stats["钱"] <= 20) {
+    return {
+      title: "结局：现金流报警",
+      text: "你撑住了场面，却把口袋掏得见底。接下来每一步都得更算计。",
+    };
+  }
+  if (stats["关系"] <= 20) {
+    return {
+      title: "结局：圈子变窄",
+      text: "你把边界守住了，也把一些人推远了。省事了，但孤单也更明显。",
+    };
+  }
+  if (average >= 58 && stats["精力"] >= 40 && stats["心气"] >= 40) {
+    return {
+      title: "结局：稳住了",
+      text: "今天没翻盘，但你把节奏攥在手里。不是漂亮仗，是成熟仗。",
+    };
+  }
+  if (average >= 45 && stats["心气"] >= 25) {
     return {
       title: "结局：有点绷不住",
-      text: "你知道自己在硬撑。面子和里子都磨薄了一层。\n事还在，账还在，人也还在——先睡吧。",
+      text: "你知道自己在硬撑。面子和里子都磨薄了一层，先睡，明早再盘。",
     };
   }
   return {
-    title: "结局：今天算是塌了",
-    text: "你把一天过成了一团乱麻。\n没人真看见你的难，但每一处都在要你付代价。\n先活过今晚，明天再说。",
+    title: `结局：${minStat[0]}失守`,
+    text: "你把一天过成一团乱麻。先活过今晚，明天把最薄弱的一项先补起来。",
   };
 }
 
+function getTopImpacts(limit = 2) {
+  return [...optionImpact.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([label, score]) => `• ${label}（影响值 ${score}）`);
+}
+
+function renderEnding() {
+  const ending = getEnding();
+  const topImpacts = getTopImpacts();
+
+  timeTagEl.textContent = "一天结束";
+  sceneTitleEl.textContent = "";
+  sceneDescEl.textContent = "";
+  optionsEl.innerHTML = "";
+  endingEl.classList.remove("hidden");
+
+  endingEl.innerHTML = `
+    <h3>${ending.title}</h3>
+    <p class="desc">${ending.text}</p>
+    <div class="recap">
+      <h4>复盘：关键转折</h4>
+      <p class="desc">${topImpacts.length ? topImpacts.join("\n") : "今天很平，没有明显转折。"}</p>
+      <button id="copySummaryBtn" class="copy-btn">复制今天经历</button>
+    </div>
+  `;
+
+  const copyBtn = document.getElementById("copySummaryBtn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const summaryText = `${ending.title}\n${ending.text}\n${topImpacts.join("\n")}`;
+      try {
+        await navigator.clipboard.writeText(summaryText);
+        copyBtn.textContent = "已复制，可直接分享";
+      } catch (error) {
+        copyBtn.textContent = "复制失败，请手动复制";
+      }
+    });
+  }
+
+  restartBtn.classList.remove("hidden");
+}
+
 function renderScene() {
-  if (sceneIndex >= scenes.length) {
-    const ending = getEnding();
-    timeTagEl.textContent = "一天结束";
-    sceneTitleEl.textContent = "";
-    sceneDescEl.textContent = "";
-    optionsEl.innerHTML = "";
-    endingEl.classList.remove("hidden");
-    endingEl.innerHTML = `<h3>${ending.title}</h3><p class="desc">${ending.text}</p>`;
-    restartBtn.classList.remove("hidden");
+  if (stageIndex >= STAGE_COUNT) {
+    renderEnding();
     return;
   }
 
-  const scene = scenes[sceneIndex];
+  resolvePendingConsequences();
+  currentScene = chooseScene();
+
+  if (!currentScene) {
+    stageIndex += 1;
+    renderScene();
+    return;
+  }
+
+  usedSceneIds.add(currentScene.id);
   endingEl.classList.add("hidden");
-  timeTagEl.textContent = scene.time;
-  sceneTitleEl.textContent = scene.title;
-  sceneDescEl.textContent = scene.description;
+  timeTagEl.textContent = currentScene.time;
+  sceneTitleEl.textContent = currentScene.title;
+  sceneDescEl.textContent = currentScene.description;
   optionsEl.innerHTML = "";
 
-  scene.options.forEach((option) => {
+  const displayedOptions = maybeAddHopeOption(currentScene.options);
+  displayedOptions.forEach((option) => {
     const button = document.createElement("button");
     button.className = "option";
     button.textContent = `${option.text}（${describeEffects(option.effects)}）`;
     button.addEventListener("click", () => chooseOption(option));
     optionsEl.appendChild(button);
   });
+
+  renderStats();
+  renderLog();
 }
 
 restartBtn.addEventListener("click", () => {
   stats = { ...initialStats };
-  sceneIndex = 0;
+  stageIndex = 0;
+  currentScene = null;
+  usedSceneIds = new Set();
   logList.length = 0;
+  turnHistory.length = 0;
+  flags.clear();
+  pendingConsequences.length = 0;
+  optionImpact.clear();
+  consecutiveBadTurns = 0;
+  hopeUsed = false;
+
   restartBtn.classList.add("hidden");
   renderStats();
   renderLog();
